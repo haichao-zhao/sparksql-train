@@ -1,4 +1,4 @@
-package com.zhc.bigdata
+package com.zhc.bigdata.chapter02
 
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -13,16 +13,21 @@ import org.apache.spark.{SparkConf, SparkContext}
   * 5）把结果输出到文件中
   * 输出：文件
   */
-object SparkWordCountApp {
+object SparkWordCountAppV2 {
 
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setMaster("local").setAppName("SparkWordCountApp")
+    val conf = new SparkConf()
 
     val sc = new SparkContext(conf)
 
-    val rdd = sc.textFile("file:///Users/zhaohaichao/data/coding385/sparksql-train/data/input.txt")
+    val rdd = sc.textFile(args(0))
 
-    rdd.flatMap(_.split(",")).map((_, 1)).reduceByKey(_+_).collect().foreach(println)
+    rdd.flatMap(_.split(",")).map((_, 1)).reduceByKey(_ + _)
+      .map(x => (x._2, x._1))
+      .sortByKey(ascending = false)
+      .map(x => (x._2, x._1))
+      .saveAsTextFile(args(1))
+
 
     sc.stop()
   }
