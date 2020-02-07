@@ -19,6 +19,14 @@ object DataSourseApp {
 
     //    json2parquet(spark)
 
+    jdbc(spark)
+
+    spark.stop()
+  }
+
+  //读写 jdbc 操作MySQL
+  private def jdbc(spark: SparkSession) = {
+
     //    val jdbcDF = spark.read
     //      .format("jdbc")
     //      .option("url", "jdbc:mysql://localhost:3306/imoocbootscala?useSSL=false")
@@ -27,14 +35,6 @@ object DataSourseApp {
     //      .option("password", "root")
     //      .load()
 
-
-    jdbc(spark)
-
-    spark.stop()
-  }
-
-  //读写 jdbc 操作MySQL
-  private def jdbc(spark: SparkSession) = {
     val conf = ConfigFactory.load()
 
     val driver = conf.getString("db.default.driver")
