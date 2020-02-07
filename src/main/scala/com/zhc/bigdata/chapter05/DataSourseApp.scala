@@ -28,6 +28,13 @@ object DataSourseApp {
     //      .load()
 
 
+    jdbc(spark)
+
+    spark.stop()
+  }
+
+  //读写 jdbc 操作MySQL
+  private def jdbc(spark: SparkSession) = {
     val conf = ConfigFactory.load()
 
     val driver = conf.getString("db.default.driver")
@@ -40,7 +47,7 @@ object DataSourseApp {
     val properties = new Properties()
     properties.put("user", user)
     properties.put("password", password)
-//    properties.put("driver", driver)
+    //    properties.put("driver", driver)
 
     val jdbcDF = spark.read
       .format("jdbc")
@@ -51,8 +58,6 @@ object DataSourseApp {
     jdbcDF.select("location", "name")
       .write.mode("append")
       .jdbc(url, s"$database.$table", properties)
-
-    spark.stop()
   }
 
   //读取json文件，写出parquet文件
