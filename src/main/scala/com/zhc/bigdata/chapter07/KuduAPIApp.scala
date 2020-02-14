@@ -25,7 +25,8 @@ object KuduAPIApp {
     //    updateRow(client, table_name)
 //    queryTable(client, table_name)
 
-        deleteTable(client, table_name)
+        deleteTable(client, "ods")
+        deleteTable(client, "province_city_stat")
 
 
     //    reTableName(client, table_name, new_table_name)

@@ -1,9 +1,9 @@
-package com.zhc.bigdata.chapter08
+package com.zhc.bigdata.chapter08.business
 
 import com.zhc.bigdata.chapter08.utils.{IPUtils, KuduUtils, SQLUtils, SchemaUtils}
 import org.apache.kudu.Schema
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
   * 日志ETL清洗操作
