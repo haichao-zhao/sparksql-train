@@ -41,7 +41,7 @@ object SparkKuduApp {
 
     spark.read.format("org.apache.kudu.spark.kudu")
       .option("kudu.master", KUDU_MASTER)
-      .option("kudu.table", "ods")
+      .option("kudu.table", "province_city_stat")
       .load().show()
 
     spark.stop()
