@@ -2,6 +2,7 @@ package com.zhc.bigdata.chapter07
 
 import java.util
 
+import com.zhc.bigdata.chapter08.utils.SchemaUtils
 import org.apache.kudu.{ColumnSchema, Schema, Type}
 import org.apache.kudu.client._
 
@@ -10,20 +11,21 @@ object KuduAPIApp {
 
   def main(args: Array[String]): Unit = {
 
+    //    val KUDU_MASTER = "tencent"
     val KUDU_MASTER = "hadoop000"
     val client: KuduClient = new KuduClient.KuduClientBuilder(KUDU_MASTER).build()
 
-    val table_name = "pk"
+    val table_name = "ods"
     val new_table_name = "new_pk"
 
-    createTable(client, table_name)
+    //    createTable(client, table_name)
 
     //    insertRows(client, new_table_name)
 
     //    updateRow(client, table_name)
-    //        queryTable(client, new_table_name)
+//    queryTable(client, table_name)
 
-    //    deleteTable(client, table_name)
+        deleteTable(client, table_name)
 
 
     //    reTableName(client, table_name, new_table_name)
@@ -37,18 +39,14 @@ object KuduAPIApp {
     */
   def createTable(client: KuduClient, table_name: String): Unit = {
 
-    import scala.collection.JavaConverters._
+    if (client.tableExists(table_name)) {
+      client.deleteTable(table_name)
+    }
 
-    val list = List(
-      new ColumnSchema.ColumnSchemaBuilder("id", Type.INT32).key(true).build(),
-      new ColumnSchema.ColumnSchemaBuilder("location", Type.STRING).build(),
-      new ColumnSchema.ColumnSchemaBuilder("name", Type.STRING).build()
-    ).asJava
-
-    val schema = new Schema(list)
+    val schema = SchemaUtils.ODSSchema
 
     val linkedList = new util.LinkedList[String]()
-    linkedList.add("id")
+    linkedList.add("ip")
 
     val options = new CreateTableOptions()
     options.setNumReplicas(1)

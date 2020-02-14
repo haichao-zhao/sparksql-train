@@ -13,36 +13,36 @@ object SparkKuduApp {
     val conf = ConfigFactory.load()
     import spark.implicits._
 
-    val driver = conf.getString("db.default.driver")
-    val url = conf.getString("db.default.url")
-    val user = conf.getString("db.default.user")
-    val password = conf.getString("db.default.password")
-    val database = conf.getString("db.default.database")
-    val table = conf.getString("db.default.table")
-
-    val properties = new Properties()
-    properties.put("user", user)
-    properties.put("password", password)
-    //    properties.put("driver", driver)
-
-    val jdbcDF = spark.read
-      .format("jdbc")
-      .jdbc(url, s"$database.$table", properties)
-
-    jdbcDF.show(truncate = false)
+    //    val driver = conf.getString("db.default.driver")
+    //    val url = conf.getString("db.default.url")
+    //    val user = conf.getString("db.default.user")
+    //    val password = conf.getString("db.default.password")
+    //    val database = conf.getString("db.default.database")
+    //    val table = conf.getString("db.default.table")
+    //
+    //    val properties = new Properties()
+    //    properties.put("user", user)
+    //    properties.put("password", password)
+    //    //    properties.put("driver", driver)
+    //
+    //    val jdbcDF = spark.read
+    //      .format("jdbc")
+    //      .jdbc(url, s"$database.$table", properties)
+    //
+    //    jdbcDF.show(truncate = false)
 
     val KUDU_MASTER = "hadoop000"
 
-    jdbcDF.write.mode(SaveMode.Append)
-      .format("org.apache.kudu.spark.kudu")
-      .option("kudu.master", KUDU_MASTER)
-      .option("kudu.table", "pk")
-      .save()
+    //    jdbcDF.write.mode(SaveMode.Append)
+    //      .format("org.apache.kudu.spark.kudu")
+    //      .option("kudu.master", KUDU_MASTER)
+    //      .option("kudu.table", "pk")
+    //      .save()
 
     spark.read.format("org.apache.kudu.spark.kudu")
       .option("kudu.master", KUDU_MASTER)
-      .option("kudu.table", "pk")
-      .load().sort($"id").show()
+      .option("kudu.table", "ods")
+      .load().show()
 
     spark.stop()
 
