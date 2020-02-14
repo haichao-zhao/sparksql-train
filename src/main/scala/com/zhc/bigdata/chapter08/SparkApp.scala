@@ -1,6 +1,6 @@
 package com.zhc.bigdata.chapter08
 
-import com.zhc.bigdata.chapter08.business.{AreaStatProcessor, LogETLProcessor, ProvinceCityStatProcessor}
+import com.zhc.bigdata.chapter08.business.{AppStatProcessor, AreaStatProcessor, LogETLProcessor, ProvinceCityStatProcessor}
 import org.apache.spark.sql.SparkSession
 
 object SparkApp {
@@ -18,8 +18,11 @@ object SparkApp {
     // STEP2:省份地市数据分布统计
 //    ProvinceCityStatProcessor.process(spark)
 
-    AreaStatProcessor.process(spark)
+    // STEP3:地域分布情况统计
+//    AreaStatProcessor.process(spark)
 
+    // STEP4:App分布情况统计
+    AppStatProcessor.process(spark)
 
     spark.stop()
 

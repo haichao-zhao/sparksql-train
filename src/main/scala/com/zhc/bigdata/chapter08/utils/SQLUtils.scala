@@ -101,4 +101,69 @@ object SQLUtils {
        |from area_tmp
        |where bid_cnt != 0 and ad_display_cnt != 0
      """.stripMargin
+
+  lazy val APP_SQL_STEP1 =
+    s"""
+       |select appid, appname ,
+       |sum (case when requestmode = 1 and processnode >= 1 then 1 else 0 end) as origin_request,
+       |sum (case when requestmode = 1 and processnode >= 2 then 1 else 0 end) as valid_request,
+       |sum (case when requestmode = 1 and processnode = 3 then 1 else 0 end) as ad_request,
+       |sum (case when adplatformproviderid >= 100000
+       |      and iseffective = 1
+       |      and isbilling = 1
+       |      and isbid = 1
+       |      and adorderid != 0
+       |      then 1 else 0 end) as bid_cnt,
+       |sum (case when adplatformproviderid >= 100000
+       |      and iseffective = 1
+       |      and isbilling = 1
+       |      and iswin = 1
+       |      then 1 else 0 end) as bid_success_cnt,
+       |sum (case when requestmode = 2
+       |      and iseffective = 1
+       |      then 1 else 0 end) as ad_display_cnt,
+       |sum (case when requestmode = 3
+       |      and iseffective = 1
+       |      then 1 else 0 end) as ad_click_cnt,
+       |sum (case when requestmode = 2
+       |      and iseffective = 1
+       |      and isbilling = 1
+       |      then 1 else 0 end) as medium_display_cnt,
+       |sum (case when requestmode = 3
+       |      and iseffective = 1
+       |      and isbilling = 1
+       |      then 1 else 0 end) as medium_click_cnt,
+       |sum (case when adplatformproviderid >= 100000
+       |      and iseffective = 1
+       |      and isbilling = 1
+       |      and iswin = 1
+       |      and adorderid > 200000
+       |      then 1 * winprice / 1000 else 0 end) as ad_consumption,
+       |sum (case when adplatformproviderid >= 100000
+       |      and iseffective = 1
+       |      and isbilling = 1
+       |      and iswin = 1
+       |      and adorderid > 200000
+       |      then 1 * adpayment / 1000 else 0 end) as ad_cost
+       |from ods group by appid, appname
+     """.stripMargin
+
+  lazy val APP_SQL_STEP2 =
+    s"""
+       |select appid, appname ,
+       |origin_request,
+       |valid_request,
+       |ad_request,
+       |bid_cnt,
+       |bid_success_cnt,
+       |bid_success_cnt/bid_cnt as bid_success_rate,
+       |ad_display_cnt,
+       |ad_click_cnt,
+       |ad_click_cnt/ad_display_cnt as ad_click_rate,
+       |ad_consumption,
+       |ad_cost
+       |from app_tmp
+       |where bid_cnt != 0 and ad_display_cnt != 0
+     """.stripMargin
+
 }
