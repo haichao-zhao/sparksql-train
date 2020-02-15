@@ -23,11 +23,19 @@ object KuduAPIApp {
     //    insertRows(client, new_table_name)
 
     //    updateRow(client, table_name)
-//    queryTable(client, table_name)
+    //    queryTable(client, table_name)
 
-        deleteTable(client, "ods")
-        deleteTable(client, "province_city_stat")
 
+    deleteTable(client, "ods_20181007")
+    deleteTable(client, "province_city_stat_20181007")
+    deleteTable(client, "app_stat_20181007")
+    deleteTable(client, "area_stat_20181007")
+//    deleteTable(client, "ods")
+//    deleteTable(client, "province_city_stat")
+//    deleteTable(client, "area_stat")
+//    deleteTable(client, "app_stat")
+//    deleteTable(client, "new_pk")
+//    deleteTable(client, "pk")
 
     //    reTableName(client, table_name, new_table_name)
   }

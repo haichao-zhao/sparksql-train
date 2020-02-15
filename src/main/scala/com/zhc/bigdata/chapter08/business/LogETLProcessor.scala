@@ -1,25 +1,33 @@
 package com.zhc.bigdata.chapter08.business
 
 import com.zhc.bigdata.chapter08.`trait`.DataProcess
-import com.zhc.bigdata.chapter08.utils.{IPUtils, KuduUtils, SQLUtils, SchemaUtils}
+import com.zhc.bigdata.chapter08.utils._
 import org.apache.kudu.Schema
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object LogETLProcessor extends DataProcess{
+object LogETLProcessor extends DataProcess {
   override def process(spark: SparkSession): Unit = {
 
+    import spark.implicits._
+
     //读取原始数据日志
-    var jsonDF: DataFrame = spark.read
-      .json("file:///Users/zhaohaichao/workspace/javaspace/sparksql-train/data/data-test.json")
+    //    var jsonDF: DataFrame = spark.read.json("file:///Users/zhaohaichao/workspace/javaspace/sparksql-train/data/data-test.json")
+    val rawPath: String = spark.sparkContext.getConf.get("spark.raw.path")
+    var jsonDF: DataFrame = spark.read.json(rawPath)
 
     //    jsonDF.printSchema()
     //    jsonDF.show()
 
     //读取ip规则库
-    val ipRowRDD: RDD[String] = spark.sparkContext
-      .textFile("file:///Users/zhaohaichao/workspace/javaspace/sparksql-train/data/ip.txt")
+    val ipPath: String = spark.sparkContext.getConf.get("spark.ip.path")
+    val ipRowRDD: RDD[String] = spark.sparkContext.textFile(ipPath)
+    //    val ipRowRDD: RDD[String] = spark.sparkContext.textFile("file:///Users/zhaohaichao/workspace/javaspace/sparksql-train/data/ip.txt")
 
+    println("-----------------------------------------------")
+    ipRowRDD.toDF().show(false)
+    println(ipPath)
+    println("-----------------------------------------------")
 
     import spark.implicits._
 
@@ -59,9 +67,9 @@ object LogETLProcessor extends DataProcess{
     // ETL处理之后需要落地到Kudu
 
     //    val KUDU_MASTER = "tencent"
-    val KUDU_MASTER = "hadoop000"
+    val KUDU_MASTER = spark.sparkContext.getConf.get("spark.kudu.master")
 
-    val tableName = "ods"
+    val tableName = DateUtils.getTableName("ods", spark)
     val schema: Schema = SchemaUtils.ODSSchema
     val partitionId = "ip"
     KuduUtils.sink(res, tableName, KUDU_MASTER, schema, partitionId)

@@ -1,7 +1,7 @@
 package com.zhc.bigdata.chapter08.business
 
 import com.zhc.bigdata.chapter08.`trait`.DataProcess
-import com.zhc.bigdata.chapter08.utils.{KuduUtils, SQLUtils, SchemaUtils}
+import com.zhc.bigdata.chapter08.utils.{DateUtils, KuduUtils, SQLUtils, SchemaUtils}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object ProvinceCityStatProcessor extends DataProcess{
@@ -9,9 +9,9 @@ object ProvinceCityStatProcessor extends DataProcess{
 
     import spark.implicits._
 
-    val KUDU_MASTER = "hadoop000"
-    val sourceTableName = "ods"
-    val toTableName = "province_city_stat"
+    val KUDU_MASTER = spark.sparkContext.getConf.get("spark.kudu.master")
+    val sourceTableName = DateUtils.getTableName("ods", spark)
+    val toTableName = DateUtils.getTableName("province_city_stat", spark)
 
     val odsDF: DataFrame = spark.read.format("org.apache.kudu.spark.kudu")
       .option("kudu.master", KUDU_MASTER)
