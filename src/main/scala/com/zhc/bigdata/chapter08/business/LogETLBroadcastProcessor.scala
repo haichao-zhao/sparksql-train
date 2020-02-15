@@ -3,10 +3,14 @@ package com.zhc.bigdata.chapter08.business
 import com.zhc.bigdata.chapter08.`trait`.DataProcess
 import com.zhc.bigdata.chapter08.utils._
 import org.apache.kudu.Schema
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object LogETLProcessor extends DataProcess {
+/**
+  * 广播变量方式实现join
+  */
+object LogETLBroadcastProcessor extends DataProcess {
   override def process(spark: SparkSession): Unit = {
 
     import spark.implicits._
@@ -24,7 +28,6 @@ object LogETLProcessor extends DataProcess {
     //    val ipRowRDD: RDD[String] = spark.sparkContext.textFile(ipPath)
     val ipRowRDD: RDD[String] = spark.sparkContext.textFile("file:///Users/zhaohaichao/workspace/javaspace/sparksql-train/data/ip.txt")
 
-
     import spark.implicits._
 
     //取出想用的字段
@@ -38,6 +41,10 @@ object LogETLProcessor extends DataProcess {
       (startIP, endIP, province, city, isp)
     }).toDF("start_ip", "end_ip", "province", "city", "isp")
 
+    ipRuleDF.show()
+
+    val ipBro: Broadcast[DataFrame] = spark.sparkContext.broadcast(ipRuleDF)
+
     //    ipRuleDF.show(false)
     // json中的ip转换一下， 通过Spark SQL UDF函数
     import org.apache.spark.sql.functions._
@@ -48,29 +55,24 @@ object LogETLProcessor extends DataProcess {
     jsonDF = jsonDF.withColumn("ip_long", getIpLog()($"ip"))
 
     // 两个DF进行join，条件是jsonDF中的ip_long 是在规则ip中的范围内，ip_long between ... and ...
-    //    jsonDF.join(ipRuleDF, jsonDF("ip_long")
-    //      .between(ipRuleDF("start_ip"), ipRuleDF("end_ip")))
-    //      .show()
 
+    val value: DataFrame = ipBro.value
 
-    jsonDF.createOrReplaceTempView("logs")
-    ipRuleDF.createOrReplaceTempView("ips")
+    jsonDF.join(value, jsonDF("ip_long")
+          .between(value("start_ip"), value("end_ip")))
+          .show()
 
-    val sql = SQLUtils.SQL
+//    Thread.sleep(30000)
 
-    val res: DataFrame = spark.sql(sql)
-
-    //    Thread.sleep(30000)
-
-    // ETL处理之后需要落地到Kudu
-
-    val KUDU_MASTER = "tencent"
-    //        val KUDU_MASTER = spark.sparkContext.getConf.get("spark.kudu.master")
-
-    val tableName = DateUtils.getTableName("ods", spark)
-    val schema: Schema = SchemaUtils.ODSSchema
-    val partitionId = "ip"
-    KuduUtils.sink(res, tableName, KUDU_MASTER, schema, partitionId)
+//    // ETL处理之后需要落地到Kudu
+//
+//    val KUDU_MASTER = "tencent"
+//    //    val KUDU_MASTER = spark.sparkContext.getConf.get("spark.kudu.master")
+//
+//    val tableName = DateUtils.getTableName("ods", spark)
+//    val schema: Schema = SchemaUtils.ODSSchema
+//    val partitionId = "ip"
+//    KuduUtils.sink(res, tableName, KUDU_MASTER, schema, partitionId)
 
   }
 }

@@ -1,6 +1,6 @@
 package com.zhc.bigdata.chapter08
 
-import com.zhc.bigdata.chapter08.business.{AppStatProcessor, AreaStatProcessor, LogETLProcessor, ProvinceCityStatProcessor}
+import com.zhc.bigdata.chapter08.business._
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
@@ -9,10 +9,10 @@ object SparkApp extends Logging {
   def main(args: Array[String]): Unit = {
 
     // .master("local[2]").appName("SparkApp")   Spark官网强调不要硬编码，appName master统一使用spark-submit提交的时候指定即可
-    val spark: SparkSession = SparkSession.builder().getOrCreate()
-      //      .master("local[2]")
-      //      .appName("SparkApp")
-
+    val spark: SparkSession = SparkSession.builder()
+      .master("local[2]")
+      .appName("SparkApp")
+      .getOrCreate()
 
     /**
       * 入参统计：
@@ -22,23 +22,24 @@ object SparkApp extends Logging {
       */
 
     // spark-submit ......  --conf spark.time=20181007
-    val time = spark.sparkContext.getConf.get("spark.time") // spark框架只认以spark.开头的参数，否则系统不识别
-    if (StringUtils.isBlank(time)) { // 如果是空，后续的代码就不应该执行了
-      logError("处理批次不能为空....")
-      System.exit(0)
-    }
+    //    val time = spark.sparkContext.getConf.get("spark.time") // spark框架只认以spark.开头的参数，否则系统不识别
+    //    if (StringUtils.isBlank(time)) { // 如果是空，后续的代码就不应该执行了
+    //      logError("处理批次不能为空....")
+    //      System.exit(0)
+    //    }
 
     // STEP1:ETL
     LogETLProcessor.process(spark)
+    LogETLBroadcastProcessor.process(spark)
 
     // STEP2:省份地市数据分布统计
-    ProvinceCityStatProcessor.process(spark)
+    //    ProvinceCityStatProcessor.process(spark)
 
     // STEP3:地域分布情况统计
-    AreaStatProcessor.process(spark)
+    //    AreaStatProcessor.process(spark)
 
     // STEP4:App分布情况统计
-    AppStatProcessor.process(spark)
+    //    AppStatProcessor.process(spark)
     //通过参数传递到Spark作业重构代码并打包
 
     spark.stop()
